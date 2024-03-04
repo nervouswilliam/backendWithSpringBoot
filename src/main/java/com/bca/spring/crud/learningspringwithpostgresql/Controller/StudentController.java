@@ -2,47 +2,54 @@ package com.bca.spring.crud.learningspringwithpostgresql.Controller;
 
 import com.bca.spring.crud.learningspringwithpostgresql.Model.Employees;
 import com.bca.spring.crud.learningspringwithpostgresql.Model.Student;
+import com.bca.spring.crud.learningspringwithpostgresql.repository.studentRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.sql.*;
+import java.util.List;
+import java.util.Map;
 
+@RestController
+@RequestMapping("/api/v1/")
 public class StudentController {
-    private static final String URL = "jdbc:postgresql://localhost:5432/student";
-    private static final String USERNAME = "postgres";
-    private static final String PASSWORD = "namaku81ll";
+    @Autowired
+    studentRepository sr;
 
-    public void createStudent(Student student) throws SQLException {
-        try(Connection connection = DriverManager.getConnection(URL, USERNAME, PASSWORD)){
-            String sql = "INSERT INTO student (first_name, last_name, email_id) VALUES (?, ?, ?)";
-            PreparedStatement statement = connection.prepareStatement(sql);
-            Student student1 = null;
-            statement.setString(1, student1.getStudent_first_name());
-            statement.setString(2, student1.getStudent_first_name());
-            statement.setString(3, student1.getStudent_email());
-            statement.executeUpdate();
-        }catch(SQLException e){
+    @PostMapping("/student")
+    public ResponseEntity<Object> insertStudent(@RequestBody Student student){
+        try{
+            Student insertStudent = sr.insert(student);
+            return ResponseEntity.ok(insertStudent);
+        } catch (Exception e) {
             e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal Server Error");
         }
     }
 
-    public Student getStudentById(long id){
-        Student student = null;
-        try(Connection connection = DriverManager.getConnection(URL, USERNAME, PASSWORD)) {
-            String sql = "SELECT * FROM STUDENT WHERE id = ?";
-            PreparedStatement statement = connection.prepareStatement(sql);
-            statement.setString(1, String.valueOf(id));
-            ResultSet resultSet = statement.executeQuery();
-            if(resultSet.next()){
-                String first_name = resultSet.getString("first_name");
-                String last_name = resultSet.getString("last_name");
-                String email_id = resultSet.getString("email_id");
-                student = new Student(first_name, last_name, email_id);
-                student.setStudentId(id);
+    @GetMapping("/student")
+    public ResponseEntity<List<Student>> getAllStudent(){
+        try {
+            List<Student> students =  sr.displayStudent();
+            if(students != null){
+                return ResponseEntity.ok(students);
             }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+            else{
+                return ResponseEntity.notFound().build();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-        return student;
     }
+
+    @DeleteMapping("/student/{id}")
+    public void deleteStudent(@PathVariable Long id){
+        sr.deleteStudentById(id);
+    }
+
 
 
 }

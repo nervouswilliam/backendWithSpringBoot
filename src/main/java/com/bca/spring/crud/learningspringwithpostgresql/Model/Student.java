@@ -1,11 +1,28 @@
 package com.bca.spring.crud.learningspringwithpostgresql.Model;
 
+import jakarta.persistence.*;
+import org.springframework.beans.factory.annotation.Autowired;
+
+@Entity
+@Table(name = "student")
 public class Student {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long studentId;
+
+    @Column
     private String student_first_name;
+    @Column
     private String student_last_name;
+    @Column
     private String student_email;
 
+    public Student(){
+
+    }
+
+    @Autowired
     public Student(String student_first_name, String student_last_name, String student_email) {
         this.student_first_name = student_first_name;
         this.student_last_name = student_last_name;
